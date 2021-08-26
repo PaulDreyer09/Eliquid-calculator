@@ -1,0 +1,39 @@
+.App {
+  text-align: center;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.Calculator{
+  padding: 10px;
+  max-width: 400px;
+  background-color: rgb(230, 230, 230);
+}
+
+.submit-btn{
+  border: none;
+  border-radius: 5px;
+  color: white;
+  background-color: black;
+  width: 100%;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  margin-top: 5px;
+}
+
+.form-control{
+  display: flex;
+  justify-content: space-between;
+}
+
+span{
+  min-width: 175px;
+}
+
+.nic-type{
+  display: flex;
+  justify-content: space-between;
+}
