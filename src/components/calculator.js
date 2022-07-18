@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import FlavorTable from "./flavorTable";
+
 
 class Calculator extends Component {
   constructor(props) {
@@ -110,7 +112,7 @@ class Calculator extends Component {
 
   render() {
     return (
-      <div className="Calculator">
+      <div className="Calculator">      
         <h3>Calculate your eliquid measurements</h3>
         <form onSubmit={(e) => this.handleSubmit(e)}>
           <div id='bottle-size' className="form-control">
@@ -122,6 +124,7 @@ class Calculator extends Component {
             onChange={this.handleChange}
           />
           </div>
+
           <div className="form-control">
             <label>PG</label>
             <span>
@@ -152,6 +155,7 @@ class Calculator extends Component {
             </span>
 
           </div>
+
           <div className="form-control">
             <label>Nicotine Base mg</label>
             <input
@@ -161,6 +165,7 @@ class Calculator extends Component {
             value={this.state.nicBase}
           />
           </div>
+
           <div className="form-control">
             <label>Nicotine Target mg</label>
             <input
@@ -170,30 +175,22 @@ class Calculator extends Component {
               value={this.state.nicTarget}
             />
           </div>
+
           <div className="form-control">
             <label>Nicotine Type: </label>
             <select className="" value={this.state.nicType} name='nicType' onChange={this.handleChange}>
               <option value="vg">VG</option>
               <option value="pg">PG</option>
             </select>
+          </div>
 
-          </div>
-          <div className="form-control">
-            <label>Flavoring %</label>
-            <span>
-              <input
-                type="range"
-                name="flavoring"
-                min="0"
-                max="100"
-                value={this.state.flavoring}
-                onChange={this.handleChange}
-              />
-              {this.state.flavoring}
-            </span>
-          </div>
+          <div>            
+            <FlavorTable />
+          </div>         
+
           <input className="submit-btn" type="submit" />
-        </form>
+        </form>       
+        
         {
           this.state.submitted? 
           <div>
