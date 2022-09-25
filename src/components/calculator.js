@@ -43,6 +43,7 @@ const Calculator = () => {
 
     //PG and VG calculations which are dependant on nicotine base type
     let pgAmount = (bottleSize * pg / 100) - flavoringAmount;
+
     let vgAmount = (bottleSize * vg / 100) ;
 
     //If nic base is pg, you need that amount of less pg and same with vg
@@ -56,10 +57,10 @@ const Calculator = () => {
     setIsSubmitted(true);
     setSubmitData({
       bottleSize: bottleSize,
-      pg: pgAmount,
-      vg: vgAmount,
-      nic: nic,
-      flavoring: flavoringPercent
+      pg: Math.round((pgAmount + Number.EPSILON) * 100) / 100,
+      vg: Math.round((vgAmount + Number.EPSILON) * 100) / 100,
+      nic: Math.round((nic + Number.EPSILON) * 100) / 100,
+      flavoring: Math.round((flavoringAmount + Number.EPSILON) * 100) / 100
       // Change to list of flavors 
     });}
     e.preventDefault();
@@ -125,8 +126,8 @@ const Calculator = () => {
               </tr>
             </thead>
             <tbody>
-              {flavorList.map((flavorItem) =>
-                <tr>
+              {flavorList.map((flavorItem,index) =>
+                <tr key={index}>
                   <td>{flavorItem.name}</td>
                   <td>{flavorItem.vendorName}</td>
                   <td>{flavorItem.percentage * submitData.bottleSize / 100} ml</td>

@@ -47,7 +47,6 @@ export default function FlavorTable({ flavorList, setFlavorList, PG}) {
 
         const totalFlavorPercerntage = tempList.reduce((total, flavor) => total + flavor.percentage, 0);
         setFlavorTotal(totalFlavorPercerntage);
-        console.log(`total: ${totalFlavorPercerntage}  PG: ${PG}`)
         if (totalFlavorPercerntage > PG) { 
             let message = `Total flavor percentage is more than selected PG percentage\nCalculations are not going to be reliable.\nAdjust PG/VG ratio or flavor item values for more reliable results`
             alert(message) 
