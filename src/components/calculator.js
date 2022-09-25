@@ -1,210 +1,234 @@
-import React, { Component } from "react";
-import FlavorTable from "./flavorTable";
+import React, { useState } from 'react';
+import FlavorTable from './flavorTable';
 
+const Calculator = () => {
 
-class Calculator extends Component {
-  constructor(props) {
-    super(props);
+  const [bottleSize, setBottleSize] = useState(100);
+  const [vg, setVg] = useState(70);
+  const [pg, setPg] = useState(30);
+  const [nicBase, setNicBase] = useState(0);
+  const [nicType, setNicType] = useState("vg");
+  const [nicTarget, setNicTarget] = useState(0);
+  const [flavorList, setFlavorList] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitData, setSubmitData] = useState({});
 
-    this.state = {
-      bottleSize: 100,
-      pg: 70,
-      vg: 30,
-      nicBase: 0,
-      nicTarget: 0,
-      nicType: "vg",
-      flavoring: 0,
-      submitted: false,
-      submitData: {}
-    };
-
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  handleSubmit(e) {
-    //Base ml to calculate with
-    const bottleSize = this.state.bottleSize;
-    
+  /**
+   * Handles form submit button
+   * @param {event} e 
+   */
+  const handleSubmit = (e) => {
     //Nicotine percentage calculations
-    const nicPercent = this.state.nicTarget > 0 ? (this.state.nicTarget / this.state.nicBase) * 100 : 0;
+    const nicPercent = nicTarget > 0 ? (nicTarget / nicBase) * 100 : 0;
     const nic = bottleSize * nicPercent / 100;
 
+    //Checking for invalid form values
+    if(nicTarget > 0 && nicBase == 0) {
+      alert("Nicotine Target can not be higher than 0 if Nicotine base is set to 0\n Calcultion results will be unreliable.");
+    }
+    else if(Math.floor(nicBase) < Math.floor(nicTarget)) {
+      alert('Nicotine base is less than Nicotine Target.\n Calculation results will be unreliable.'); 
+    }
+    else if(nicPercent > vg && nicType === "vg") {
+      alert("VG set too low for the amount of nicotine.\n Calculation results will be unreliable."); 
+    }
+    else if(nicPercent > pg && nicType === "pg") {
+      alert("PG set too low for the amount of nicotine.\n Calculation results will be unreliable."); 
+    }   
+    else{
     //Flavoring percentage calculations
-    const flavoringPercent = this.state.flavoring;
-    const flavoring = (bottleSize * flavoringPercent) / 100;
+    const flavoringPercent = flavorList.reduce((total, flavorItem) => total + flavorItem.percentage, 0);
 
-    //Value for base ingredients total after flavoring is removed from the total liquid
-    const basePercent = bottleSize * (100 - flavoringPercent) / 100;
+    const flavoringAmount = (bottleSize * flavoringPercent) / 100;
 
     //PG and VG calculations which are dependant on nicotine base type
-    let pg = (bottleSize  * (basePercent * this.state.pg /100)) / 100;
-    let vg = (bottleSize  * (basePercent * this.state.vg /100)) / 100;
+    let pgAmount = (bottleSize * pg / 100) - flavoringAmount;
+    let vgAmount = (bottleSize * vg / 100) ;
 
     //If nic base is pg, you need that amount of less pg and same with vg
-    if(this.state.nicType === "vg"){
-      vg -= nic;
-    }else{
-      pg -= nic;
-    }    
+    if (nicType === "vg") {
+      vgAmount -= nic;
+    } else {
+      pgAmount -= nic;
+    }
 
-    this.setState({
-      submitted: true,
-      submitData: {
-        bottleSize: bottleSize,
-        pg: pg,
-        vg: vg,
-        nic: nic,
-        flavoring: flavoring
-      }
-    });
+    //Submit Data stored
+    setIsSubmitted(true);
+    setSubmitData({
+      bottleSize: bottleSize,
+      pg: pgAmount,
+      vg: vgAmount,
+      nic: nic,
+      flavoring: flavoringPercent
+      // Change to list of flavors 
+    });}
     e.preventDefault();
   }
 
-  handleChange(e) {
+  /**
+   * Handles form changes
+   * @param {event} e 
+   */
+  const handleChange = (e) => {
     switch (e.target.name) {
       case "pg":
-        this.setState({
-          pg: e.target.value,
-          vg: 100 - e.target.value
-        });
+        setPg(e.target.value);
+        setVg(100 - e.target.value)
         break;
 
       case "vg":
-        this.setState({
-          vg: e.target.value,
-          pg: 100 - e.target.value
-        });
+        setVg(e.target.value)
+        setPg(100 - e.target.value)
         break;
 
       case "bottleSize":
-        this.setState({
-          bottleSize: e.target.value
-        });
+        setBottleSize(e.target.value);
         break;
 
       case "nicBase":
-        this.setState({
-          nicBase: e.target.value
-        });
+        setNicBase(e.target.value)
         break;
 
       case "nicTarget":
-        this.setState({
-          nicTarget: e.target.value
-        });
+        setNicTarget(e.target.value);
         break;
 
       case "nicType":
-        this.setState({
-          nicType: e.target.value
-        });
+        setNicType(e.target.value);
         break;
 
-      case "flavoring":
-        this.setState({
-          flavoring: e.target.value
-        });
-        break;
       default:
         break;
     }
   }
 
-  render() {
+  /**
+   * Display the JSX object that shows the calculation results
+   * @returns {JSX}
+   */
+  const showResultsDisplay = () => {
     return (
-      <div className="Calculator">      
-        <h3>Calculate your eliquid measurements</h3>
-        <form onSubmit={(e) => this.handleSubmit(e)}>
-          <div id='bottle-size' className="form-control">
-            <label>Bottle Size (ml)</label>
-            <input
+      <div>
+        <h2>Results</h2>
+        <p>Bottle Size:   {submitData.bottleSize}</p>
+        <p>PG:   {submitData.pg} ml</p>
+        <p>VG:   {submitData.vg} ml</p>
+        <p>Nicotine({nicType.toUpperCase()}):   {submitData.nic} ml</p>
+        <p>Flavoring:   {submitData.flavoring} ml</p>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Flavor Name</th>
+                <th>Vendor</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flavorList.map((flavorItem) =>
+                <tr>
+                  <td>{flavorItem.name}</td>
+                  <td>{flavorItem.vendorName}</td>
+                  <td>{flavorItem.percentage * submitData.bottleSize / 100} ml</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="Calculator2">
+      <h3>Calculate your eliquid measurements</h3>
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <div id='bottle-size' className="form-control">
+          <label>Bottle Size (ml)</label>
+          <input
             type="number"
             name="bottleSize"
-            value={this.state.bottleSize}
-            onChange={this.handleChange}
+            value={bottleSize}
+            onChange={handleChange}
           />
-          </div>
+        </div>
 
-          <div className="form-control">
-            <label>PG</label>
-            <span>
-              <input
-                type="range"
-                onChange={this.handleChange}
-                name="pg"
-                min="0"
-                max="100"
-                value={this.state.pg}
-              />
-              {this.state.pg}%
-            </span>
-          </div>
-          
-          <div className="form-control">
-            <label>VG</label>
-            <span>
-              <input
-                type="range"
-                onChange={this.handleChange}
-                name="vg"
-                min="0"
-                max="100"
-                value={this.state.vg}
-              />
-              {this.state.vg}%
-            </span>
-
-          </div>
-
-          <div className="form-control">
-            <label>Nicotine Base mg</label>
+        <div className="form-control">
+          <label>PG</label>
+          <span>
             <input
+              type="range"
+              onChange={handleChange}
+              name="pg"
+              min="0"
+              max="100"
+              value={pg}
+            />
+            {pg}%
+          </span>
+        </div>
+
+        <div className="form-control">
+          <label>VG</label>
+          <span>
+            <input
+              type="range"
+              onChange={handleChange}
+              name="vg"
+              min="0"
+              max="100"
+              value={vg}
+            />
+            {vg}%
+          </span>
+
+        </div>
+
+        <div className="form-control">
+          <label>Nicotine Base mg</label>
+          <input
             type="number"
             name="nicBase"
-            onChange={this.handleChange}
-            value={this.state.nicBase}
+            onChange={handleChange}
+            value={nicBase}
           />
-          </div>
+        </div>
 
-          <div className="form-control">
-            <label>Nicotine Target mg</label>
-            <input
-              type="number"
-              name="nicTarget"
-              onChange={this.handleChange}
-              value={this.state.nicTarget}
-            />
-          </div>
+        <div className="form-control">
+          <label>Nicotine Target mg</label>
+          <input
+            type="number"
+            name="nicTarget"
+            onChange={handleChange}
+            value={nicTarget}
+          />
+        </div>
 
-          <div className="form-control">
-            <label>Nicotine Type: </label>
-            <select className="" value={this.state.nicType} name='nicType' onChange={this.handleChange}>
-              <option value="vg">VG</option>
-              <option value="pg">PG</option>
-            </select>
-          </div>
+        <div className="form-control">
+          <label>Nicotine Type: </label>
+          <select className="" value={nicType} name='nicType' onChange={handleChange}>
+            <option value="vg">VG</option>
+            <option value="pg">PG</option>
+          </select>
+        </div>
 
-          <div>            
-            <FlavorTable />
-          </div>         
+        <div>
+          <FlavorTable
+            flavorList={flavorList}
+            setFlavorList={setFlavorList}
+            PG={pg}
+          />
+        </div>
 
-          <input className="submit-btn" type="submit" />
-        </form>       
-        
-        {
-          this.state.submitted? 
-          <div>
-            <h2>Results</h2>
-            <p>Bottle Size: {this.state.submitData.bottleSize}</p>
-            <p>PG: {this.state.submitData.pg} ml</p>
-            <p>VG: {this.state.submitData.vg} ml</p>
-            <p>Nicotine: {this.state.submitData.nic} ml</p>
-            <p>Flavoring: {this.state.submitData.flavoring} ml</p>
-          </div> : ''
-        }
-      </div>
-    );
-  }
+        <input className="submit-btn" type="submit" />
+      </form>
+
+      {
+        isSubmitted ? showResultsDisplay() : ''
+      }
+    </div>
+  );
 }
 
 export default Calculator;
